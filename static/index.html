@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio FM 98.5 — Regiepult</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#ef4444',
+              navy: '#0f172a',
+              card: '#1e293b',
+              accent: '#38bdf8'
+            }
+          },
+          animation: {
+            'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes vubar {
+      0%, 100% { height: 4px; }
+      50% { height: 24px; }
+    }
+    .vu-bar-1 { animation: vubar 0.8s ease-in-out infinite; }
+    .vu-bar-2 { animation: vubar 0.5s ease-in-out infinite 0.1s; }
+    .vu-bar-3 { animation: vubar 0.7s ease-in-out infinite 0.2s; }
+    .vu-bar-4 { animation: vubar 0.6s ease-in-out infinite 0.3s; }
+    .vu-bar-5 { animation: vubar 0.9s ease-in-out infinite 0.15s; }
+    
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans select-none">
+
+  <!-- TOP APP HEADER -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-6 py-3.5 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-[1700px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Transmitter Info -->
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-red-600 to-amber-500 flex items-center justify-center shadow-lg shadow-red-950 flex-shrink-0">
+          <i data-lucide="radio" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-xl font-black tracking-wider uppercase text-white"><span id="brandName">Studio FM</span> <span id="brandFrequency" class="text-red-500 font-mono">98.5</span></h1>
+            <span id="brandClaim" class="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 uppercase truncate max-w-[200px]">Live Studio</span>
+          </div>
+          <p id="brandSubtitle" class="text-xs text-slate-400 truncate max-w-md">KI-Moderatorenstudio & Regiepult für AzuraCast</p>
+        </div>
+      </div>
+
+      <!-- Live Studio On Air Lamp & Clock -->
+      <div class="flex items-center gap-5">
+        <!-- ON AIR LAMP -->
+        <div class="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-red-950/60 border border-red-600/50 shadow-inner">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-lg shadow-red-500"></span>
+          </span>
+          <span class="text-xs font-black tracking-widest text-red-200 uppercase">ON AIR</span>
+          <!-- Audio VU Mini Meter -->
+          <div class="flex items-end gap-1 h-5 ml-1">
+            <span class="w-1 bg-red-500 rounded-full vu-bar-1"></span>
+            <span class="w-1 bg-amber-400 rounded-full vu-bar-2"></span>
+            <span class="w-1 bg-emerald-400 rounded-full vu-bar-3"></span>
+            <span class="w-1 bg-red-500 rounded-full vu-bar-4"></span>
+            <span class="w-1 bg-amber-400 rounded-full vu-bar-5"></span>
+          </div>
+        </div>
+
+        <!-- Studio Clock -->
+        <div class="text-right border-l border-slate-800 pl-4 hidden sm:block">
+          <div id="studioClock" class="font-mono text-xl font-bold tracking-wider text-slate-200">--:--:--</div>
+          <div id="studioShift" class="text-[11px] text-slate-400">Lade Schicht...</div>
+        </div>
+
+        <!-- Weather Badge -->
+        <div id="weatherBadge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300">
+          <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400"></i>
+          <span id="weatherText">Wetter: Lade...</span>
+        </div>
+
+        <!-- Moderatoren Team Button -->
+        <button id="openModeratorsBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition shadow hover:border-sky-500/50">
+          <i data-lucide="users" class="w-4 h-4 text-sky-400"></i>
+          <span>Moderatoren-Team</span>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="openSettingsBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition shadow hover:border-amber-500/50" title="Sender-Name, Frequenz & allgemeines Theme anpassen">
+          <i data-lucide="settings" class="w-4 h-4 text-amber-400"></i>
+          <span>Sender-Einstellungen</span>
+        </button>
+      </div>
+      
+    </div>
+  </header>
+
+  <!-- MAIN STUDIO GRID -->
+  <main class="max-w-[1700px] w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+    
+    <!-- ========================================== -->
+    <!-- LINKS: LIVE STREAM & ABLAUF-STEUERUNG (4 cols) -->
+    <!-- ========================================== -->
+    <div class="lg:col-span-4 flex flex-col gap-6">
+
+      <!-- CURRENTLY PLAYING CARD -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl pointer-events-none"></div>
+        
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <i data-lucide="disc-3" class="w-4 h-4 text-sky-400 animate-spin" style="animation-duration: 8s;"></i>
+            Aktuell im Programm
+          </div>
+          <span id="nowPlaylistBadge" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Musik</span>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <!-- Album Art -->
+          <div class="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-800 border border-slate-700/80 flex-shrink-0 shadow-md">
+            <img id="nowArt" src="" alt="Album Art" class="w-full h-full object-cover hidden">
+            <div id="nowArtPlaceholder" class="w-full h-full flex items-center justify-center text-slate-600">
+              <i data-lucide="music" class="w-8 h-8"></i>
+            </div>
+          </div>
+
+          <!-- Song Info -->
+          <div class="flex-1 min-w-0">
+            <div id="nowTitle" class="text-base font-bold text-white truncate">Lade Song...</div>
+            <div id="nowArtist" class="text-xs text-slate-400 truncate mt-0.5">...</div>
+            
+            <!-- Progress Bar -->
+            <div class="mt-3">
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="nowProgress" class="bg-gradient-to-r from-sky-400 to-red-500 h-1.5 rounded-full w-0 transition-all duration-1000"></div>
+              </div>
+              <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-1.5">
+                <span id="nowElapsed">0:00</span>
+                <span id="nowDuration">0:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Song Preview -->
+        <div class="mt-4 pt-3.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-slate-400 truncate min-w-0">
+            <i data-lucide="fast-forward" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0"></i>
+            <span class="text-slate-500 flex-shrink-0">Als Nächstes:</span>
+            <span id="nextTitle" class="text-slate-300 font-medium truncate">Lade...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODERATION TRACK COUNTDOWN & AUTOPILOT -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i>
+            Autopilot & 5-Track-Ablauf
+          </div>
+          <!-- Autopilot Toggle -->
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="autopilotToggle" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Track Counter Visualizer -->
+        <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800/60 mb-4">
+          <div class="flex justify-between items-center text-xs mb-2">
+            <span class="text-slate-400">Tracks seit letzter Moderation:</span>
+            <span id="trackCounterText" class="font-mono font-bold text-sky-400 text-sm">0 / 5</span>
+          </div>
+          <div class="grid grid-cols-5 gap-1.5" id="trackSlots">
+            <div class="h-2 rounded bg-slate-800 slot-1"></div>
+            <div class="h-2 rounded bg-slate-800 slot-2"></div>
+            <div class="h-2 rounded bg-slate-800 slot-3"></div>
+            <div class="h-2 rounded bg-slate-800 slot-4"></div>
+            <div class="h-2 rounded bg-slate-800 slot-5"></div>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span id="autopilotStatusMsg">AzuraCast greift bei Track 5 in den Moderationen-Ordner.</span>
+          </div>
+
+          <!-- Dynamic Next Slot Indicator -->
+          <div id="nextSlotBadge" class="mt-2.5 px-3 py-1.5 rounded-lg bg-sky-950/60 border border-sky-500/30 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Nächster Slot:</span>
+            <span id="nextSlotText" class="font-bold text-sky-400 flex items-center gap-1.5">
+              <i data-lucide="newspaper" class="w-3.5 h-3.5"></i>
+              Stunden-Nachrichten (Markus)
+            </span>
+          </div>
+        </div>
+
+        <!-- Autopilot Settings Controls -->
+        <div class="space-y-3.5 text-xs">
+          <!-- Hourly News Toggle -->
+          <div class="flex items-center justify-between">
+            <label class="text-slate-400">Stunden-News (ca. 1x/h):</label>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="hourlyNewsToggle" class="sr-only peer" checked>
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
+            </label>
+          </div>
+
+          <!-- Intervall Selector -->
+          <div class="flex items-center justify-between">
+            <label class="text-slate-400">Moderations-Intervall:</label>
+            <select id="intervalSelect" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-sky-400 outline-none">
+              <option value="3">Alle 3 Songs</option>
+              <option value="4">Alle 4 Songs</option>
+              <option value="5" selected>Alle 5 Songs (Standard)</option>
+              <option value="6">Alle 6 Songs</option>
+              <option value="7">Alle 7 Songs</option>
+            </select>
+          </div>
+
+          <!-- Duo Chance Slider -->
+          <div>
+            <div class="flex justify-between text-slate-400 mb-1">
+              <span>Co-Moderation (Duo-Chance):</span>
+              <span id="duoChanceLabel" class="font-mono text-sky-400">25%</span>
+            </div>
+            <input type="range" id="duoChanceSlider" min="0" max="100" step="5" value="25" class="w-full accent-sky-400 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+          </div>
+
+          <!-- Preferred Persona Mode -->
+          <div class="flex items-center justify-between">
+            <label class="text-slate-400">Sprecher-Auswahl:</label>
+            <select id="personaModeSelect" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1 focus:ring-1 focus:ring-sky-400 outline-none">
+              <option value="random" selected>Zufällige Rotation</option>
+              <option value="alice">Nur Alice</option>
+              <option value="kalle">Nur Kalle</option>
+              <option value="sven">Nur Sven</option>
+              <option value="duo">Immer Duo (Alice & Kalle)</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="saveAutopilotBtn" class="w-full mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          Einstellungen speichern
+        </button>
+      </div>
+
+      <!-- RECENT SONGS HISTORY -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 shadow-xl flex-1">
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+          <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+          Zuletzt gespielt
+        </div>
+        <div id="songHistoryList" class="space-y-2 text-xs text-slate-400">
+          <div class="text-slate-600 italic">Lade Historie...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MITTE: LIVE-REGIEPULT & TELEPROMPTER (5 cols) -->
+    <!-- ========================================== -->
+    <div class="lg:col-span-5 flex flex-col gap-6">
+
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-6 shadow-xl flex-1 flex flex-col relative">
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center">
+              <i data-lucide="mic" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-white uppercase tracking-wider">Live-Regiepult & Prompter</h2>
+              <p class="text-[11px] text-slate-400">Manuelle Moderationen vorbereiten, editieren & senden</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Studio 1</span>
+        </div>
+
+        <!-- 1. MODERATOR AUSWÄHLEN (Cards) -->
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Moderator / Persona wählen</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="personaCards">
+            <!-- Alice -->
+            <button type="button" data-speaker="alice" class="persona-btn active flex flex-col items-center p-2.5 rounded-xl border border-red-500/80 bg-red-950/30 text-white text-center transition hover:border-red-400">
+              <span class="text-xl mb-1">👩</span>
+              <span class="font-bold text-xs">Alice</span>
+              <span class="text-[10px] text-slate-400 truncate w-full">Kult-Chefin</span>
+            </button>
+            <!-- Kalle -->
+            <button type="button" data-speaker="kalle" class="persona-btn flex flex-col items-center p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 text-slate-300 text-center transition hover:border-slate-700">
+              <span class="text-xl mb-1">🔧</span>
+              <span class="font-bold text-xs">Kalle</span>
+              <span class="text-[10px] text-slate-400 truncate w-full">Schrauber</span>
+            </button>
+            <!-- Sven -->
+            <button type="button" data-speaker="sven" class="persona-btn flex flex-col items-center p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 text-slate-300 text-center transition hover:border-slate-700">
+              <span class="text-xl mb-1">⚡</span>
+              <span class="font-bold text-xs">Sven</span>
+              <span class="text-[10px] text-slate-400 truncate w-full">Elektroniker</span>
+            </button>
+            <!-- Duo -->
+            <button type="button" data-speaker="duo" class="persona-btn flex flex-col items-center p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 text-slate-300 text-center transition hover:border-slate-700">
+              <span class="text-xl mb-1">🎙️</span>
+              <span class="font-bold text-xs">Duo</span>
+              <span class="text-[10px] text-slate-400 truncate w-full">Alice & Kalle</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. THEMEN-VORGABE (Optional) -->
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Thema / Notiz (optional):</label>
+            <span class="text-[10px] text-slate-500">Freilassen für automatischen Schicht-Bezug</span>
+          </div>
+          <div class="relative">
+            <input type="text" id="customTopicInput" placeholder="z. B. Kantinen-Essen, Festgerostete Schrauben, Feierabend, Grüße..." class="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:border-sky-400 focus:outline-none transition">
+          </div>
+        </div>
+
+        <!-- GENERATE DRAFT BUTTON -->
+        <button id="generateDraftBtn" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-sky-950 transition">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Entwurf mit Gemini generieren</span>
+        </button>
+
+        <!-- 3. TELEPROMPTER / EDITIER-FELD -->
+        <div class="mt-4 flex-1 flex flex-col">
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-sky-400"></i>
+              Teleprompter (Sprechtext live anpassen):
+            </label>
+            <span id="charCount" class="text-[10px] font-mono text-slate-500">0 Zeichen</span>
+          </div>
+          <textarea id="prompterText" rows="6" placeholder="Klicke auf 'Entwurf generieren' oder tippe hier direkt deinen Moderationstext ein..." class="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm font-sans leading-relaxed text-slate-100 placeholder-slate-700 focus:border-red-500/80 focus:ring-1 focus:ring-red-500/50 outline-none resize-none transition"></textarea>
+        </div>
+
+        <!-- 4. AUDIO-VORSCHAU PLAYER -->
+        <div class="mt-4 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col sm:flex-row items-center gap-3">
+          <button id="renderPreviewBtn" class="w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center justify-center gap-2 transition flex-shrink-0">
+            <i data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i>
+            Audio vorhören
+          </button>
+          <!-- HTML5 Audio -->
+          <audio id="previewAudio" controls class="w-full h-8 opacity-90"></audio>
+        </div>
+
+        <!-- 5. FINAL ON-AIR BUTTON -->
+        <div class="mt-4">
+          <button id="sendOnAirBtn" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-sm tracking-widest uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-red-950 border border-red-500/50 transition transform active:scale-[0.99]">
+            <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
+            <span>JETZT ON AIR SCHICKEN (Upload zu AzuraCast)</span>
+          </button>
+          <p class="text-[11px] text-center text-slate-500 mt-2">Wird als <code class="text-slate-400">Moderationen/moderation.mp3</code> bereitgestellt und ins Archiv gesichert.</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- RECHTS: BLITZ-DURCHSAGE, ARCHIV & LOGS (3 cols) -->
+    <!-- ========================================== -->
+    <div class="lg:col-span-3 flex flex-col gap-6">
+
+      <!-- BLITZ-DURCHSAGE / EILMELDUNG -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 shadow-xl">
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-3">
+          <i data-lucide="megaphone" class="w-4 h-4"></i>
+          Blitz-Durchsage / Eilmeldung
+        </div>
+        <p class="text-[11px] text-slate-400 mb-2.5">Spontane Durchsage sofort vertonen und on-air stellen:</p>
+        <textarea id="shoutoutText" rows="2" placeholder="z. B. Achtung Werkstatt: Die Kaffeemaschine in Halle 2 ist wieder repariert!" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-600 focus:border-amber-400 outline-none resize-none mb-2.5"></textarea>
+        
+        <div class="flex gap-2 mb-2.5">
+          <select id="shoutoutSpeaker" class="flex-1 bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none">
+            <option value="markus">Markus (Offiziell)</option>
+            <option value="alice" selected>Alice (Chefin)</option>
+            <option value="kalle">Kalle (Werkstatt)</option>
+            <option value="sven">Sven (Elektronik)</option>
+          </select>
+          <button id="sendShoutoutBtn" class="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center gap-1 transition">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            Senden
+          </button>
+        </div>
+
+        <button id="triggerNewsBtn" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="newspaper" class="w-3.5 h-3.5 text-sky-400"></i>
+          Stunden-Nachrichten jetzt anfordern (Markus)
+        </button>
+      </div>
+
+      <!-- SENDE-ARCHIV -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <i data-lucide="archive" class="w-4 h-4 text-slate-400"></i>
+            Kürzliche Moderationen
+          </div>
+          <span class="text-[10px] text-slate-500 font-mono">Archiv</span>
+        </div>
+        <div id="recentModerationsList" class="space-y-2.5 max-h-52 overflow-y-auto pr-1 text-xs">
+          <div class="text-slate-600 italic">Noch keine Moderationen aufgezeichnet.</div>
+        </div>
+      </div>
+
+      <!-- STUDIO LOGBUCH -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 shadow-xl flex-1 flex flex-col">
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+          <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i>
+          Studio-Logbuch
+        </div>
+        <div id="studioLogList" class="bg-slate-950 rounded-xl p-3 font-mono text-[11px] space-y-1.5 flex-1 max-h-52 overflow-y-auto text-slate-400 border border-slate-800/80">
+          <div>[00:00:00] Studio gestartet.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODERATOREN MODAL -->
+  <div id="moderatorsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-wide">Studio FM Moderatoren-Team</h3>
+            <p class="text-xs text-slate-400">Verwalte Charaktere, Sendezeiten, Stimmen & Prompts</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="addModeratorBtn" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Neuer Moderator</span>
+          </button>
+          <button id="closeModeratorsBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body (Two Views: List View & Edit Form View) -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-6">
+        
+        <!-- VIEW 1: MODERATOREN LISTE -->
+        <div id="moderatorsListView" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="moderatorsGrid">
+            <!-- Dynamically populated cards -->
+          </div>
+        </div>
+
+        <!-- VIEW 2: MODERATOR FORMULAR (ADD / EDIT) -->
+        <div id="moderatorFormView" class="hidden space-y-4 bg-slate-950/50 p-5 rounded-xl border border-slate-800/80">
+          <div class="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 gap-3">
+            <h4 id="formTitle" class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-sky-400"></i>
+              Moderator bearbeiten
+            </h4>
+            <div class="flex items-center gap-2">
+              <button type="button" id="randomizeModBtn" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition shadow active:scale-95" title="Schnell einen witzigen Charakter auswürfeln">
+                <i data-lucide="dice-5" class="w-4 h-4 text-amber-400"></i>
+                <span>Zufalls-Charakter 🎲</span>
+              </button>
+              <button type="button" id="aiGenerateModBtn" class="px-3 py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center gap-1.5 transition shadow active:scale-95" title="Lässt Gemini einen komplett neuen Moderator erfinden">
+                <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+                <span>KI-Erfinder ✨</span>
+              </button>
+              <button type="button" id="cancelFormBtn" class="text-xs text-slate-400 hover:text-slate-200 ml-1 px-2 py-1">Zurück</button>
+            </div>
+          </div>
+
+          <form id="moderatorForm" class="space-y-4">
+            <input type="hidden" id="modIsNew" value="false">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">ID (systemweit)</label>
+                <input type="text" id="modId" required placeholder="z. B. kalle" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 outline-none">
+                <span class="text-[10px] text-slate-500">Kleinbuchstaben, keine Leerzeichen</span>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Name</label>
+                <input type="text" id="modName" required placeholder="z. B. Kalle" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Avatar Emoji</label>
+                <input type="text" id="modAvatar" maxlength="4" value="🎙️" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-center text-white focus:border-sky-400 outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Rolle / Titel</label>
+                <input type="text" id="modRole" required placeholder="z. B. Werkstatt-Urgestein & Schrauber" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">TTS-Stimme (Edge-TTS Deutsch)</label>
+                <select id="modVoice" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 outline-none">
+                  <!-- Dynamically populated from available_voices -->
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Kurzbeschreibung (für UI-Karten)</label>
+              <input type="text" id="modDescription" placeholder="z. B. Liebt Kaffee, schimpft über Schrauben & reißt Flachwitze." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-sky-400 outline-none">
+            </div>
+
+            <!-- Sendezeiten / Schichtauswahl -->
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-sky-400"></i>
+                Aktive Sendezeiten / Schicht
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                <div class="sm:col-span-1">
+                  <label class="block text-[11px] text-slate-400 mb-1">Schicht-Vorlage:</label>
+                  <select id="shiftPresetSelect" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:border-sky-400 outline-none">
+                    <option value="24/7">24/7 — Rund um die Uhr</option>
+                    <option value="frueh">Frühschicht (06:00 - 14:00 Uhr)</option>
+                    <option value="tag">Tagesschicht (06:00 - 16:00 Uhr)</option>
+                    <option value="spaet">Spätschicht (14:00 - 22:00 Uhr)</option>
+                    <option value="nacht">Nachtschicht (22:00 - 06:00 Uhr)</option>
+                    <option value="custom">Benutzerdefiniert</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Von (Uhr):</label>
+                  <input type="number" id="modHourStart" min="0" max="24" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Bis (Uhr):</label>
+                  <input type="number" id="modHourEnd" min="0" max="24" value="24" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none">
+                </div>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-2">Außerhalb dieser Stunden wird dieser Moderator im Autopilot nicht ausgewählt.</p>
+            </div>
+
+            <!-- Enabled Checkbox -->
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="modEnabled" checked class="w-4 h-4 rounded bg-slate-900 border-slate-800 text-sky-500 focus:ring-0">
+              <label for="modEnabled" class="text-xs text-slate-300 font-medium cursor-pointer">Moderator aktivieren (kann für Moderationen eingesetzt werden)</label>
+            </div>
+
+            <!-- Gemini Persona Prompt -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="bot" class="w-3.5 h-3.5 text-sky-400"></i>
+                  Charakter & Prompt-Anweisung für Gemini KI:
+                </label>
+                <span class="text-[10px] text-slate-500">Definiert Persönlichkeit, Ton & Sprache</span>
+              </div>
+              <textarea id="modPrompt" rows="6" required placeholder="Du bist ..., dein Ton: ..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono leading-relaxed text-slate-200 placeholder-slate-600 focus:border-sky-400 outline-none resize-y"></textarea>
+              <p class="text-[10px] text-slate-500 mt-1">Tipp: Beschreibe Tonfall (urig, frech, seriös), typische Begrüßungen ('Moin moin'), Lieblingsthemen (Werft, Kaffee, Musik) und Eigenheiten.</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <button type="button" id="formCancelBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">Abbrechen</button>
+              <button type="submit" id="formSaveBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-sky-950 flex items-center gap-1.5 transition">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Moderator speichern
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SENDER-EINSTELLUNGEN MODAL -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-wide">Sender-Einstellungen & Theme</h3>
+            <p class="text-xs text-slate-400">Name, Claim, Atmosphäre & Setting (Moderatoren passen sich automatisch an)</p>
+          </div>
+        </div>
+
+        <button id="closeSettingsBtn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto flex-1 space-y-4">
+        <!-- Schnell-Thema Vorlagen -->
+        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <label class="block text-xs font-bold text-amber-300 mb-0.5 flex items-center gap-1.5">
+              <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+              Schnell-Themen & Voreinstellungen:
+            </label>
+            <p class="text-[11px] text-slate-400">Wähle ein vorgefertigtes Setting oder passe alles frei an.</p>
+          </div>
+          <select id="stationPresetSelect" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-400">
+            <option value="custom">-- Eigenes Thema --</option>
+            <option value="studio">🎙️ Studio FM (Standard)</option>
+            <option value="space">🚀 Orbital Space Station 2142 (Sci-Fi)</option>
+            <option value="rock">🎸 Pure Rock City (Norddeutschlands Rocksender)</option>
+            <option value="pirate">🏴‍☠️ Freies Piraten-Radio (Offshore von Helgoland)</option>
+            <option value="beach">🌴 Sunset Beach Club (Lässige Strandbar)</option>
+            <option value="cyber">⚡ Neon Cyberpunk 2099 (Dystopischer Untergrund)</option>
+          </select>
+        </div>
+
+        <form id="stationSettingsForm" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Sender-Name</label>
+              <input type="text" id="settingStationName" required placeholder="z. B. Studio FM" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Frequenz / Kennung</label>
+              <input type="text" id="settingStationFreq" placeholder="z. B. 98.5" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Station-Claim / Slogan / Untertitel</label>
+            <input type="text" id="settingStationClaim" placeholder="z. B. Dein Sender. Dein Sound." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Musikstil / Programm-Vibe</label>
+            <input type="text" id="settingStationGenre" placeholder="z. B. Rock, Pop, Classic Hits & Alternative" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+
+          <!-- Theme / Setting Prompt -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                Generelles Thema, Setting & Atmosphäre:
+              </label>
+              <span class="text-[10px] text-slate-500">Wird in alle Moderatoren-Prompts injiziert</span>
+            </div>
+            <textarea id="settingStationTheme" rows="4" required placeholder="Beschreibe die Kulisse, Arbeitsumgebung, Zielgruppe und Atmosphäre des Senders..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-sans leading-relaxed text-slate-200 placeholder-slate-600 focus:border-amber-400 outline-none resize-y"></textarea>
+            <p class="text-[10px] text-slate-500 mt-1">Alle Moderatoren (und Co-Dialoge sowie Nachrichten) greifen dieses Setting in ihren Zwischenmoderationen, Witzen und Übergängen automatisch auf.</p>
+          </div>
+
+          <!-- Wetter-Standort -->
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <label class="block text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
+              <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-sky-400"></i>
+              Wetter-Standort (Echtzeit Open-Meteo Abfrage)
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Ortsname (für Ansagen):</label>
+                <input type="text" id="settingWeatherCity" placeholder="z. B. Hamburg" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Breitengrad (Lat):</label>
+                <input type="number" step="0.01" id="settingWeatherLat" value="53.55" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Längengrad (Lon):</label>
+                <input type="number" step="0.01" id="settingWeatherLon" value="9.99" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <button type="button" id="cancelSettingsBtn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">Abbrechen</button>
+            <button type="submit" id="saveSettingsBtn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-500 hover:to-red-500 text-xs font-bold text-white shadow-lg shadow-amber-950 flex items-center gap-1.5 transition">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              Einstellungen speichern
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs shadow-2xl flex items-center gap-2.5 transform translate-y-24 opacity-0 transition-all duration-300 z-50">
+    <i id="toastIcon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">Meldung</span>
+  </div>
+
+  <!-- CLIENT LOGIC JS -->
+  <script>
+    let currentSpeaker = "alice";
+    let nowPlayingElapsed = 0;
+    let nowPlayingDuration = 0;
+
+    // Toast Helper
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toastMsg");
+      const toastIcon = document.getElementById("toastIcon");
+
+      toastMsg.innerText = msg;
+      if (isError) {
+        toastIcon.setAttribute("data-lucide", "alert-circle");
+        toastIcon.className = "w-4 h-4 text-red-400";
+        toast.className = "fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-red-950 border border-red-800 text-white text-xs shadow-2xl flex items-center gap-2.5 transform translate-y-0 opacity-100 transition-all duration-300 z-50";
+      } else {
+        toastIcon.setAttribute("data-lucide", "check-circle");
+        toastIcon.className = "w-4 h-4 text-emerald-400";
+        toast.className = "fixed bottom-6 right-6 px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs shadow-2xl flex items-center gap-2.5 transform translate-y-0 opacity-100 transition-all duration-300 z-50";
+      }
+      lucide.createIcons();
+      setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("translate-y-24", "opacity-0");
+      }, 4000);
+    }
+
+    // Format Seconds to MM:SS
+    function formatTime(sec) {
+      if (!sec || isNaN(sec)) return "0:00";
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    let cachedModerators = {};
+    let cachedVoices = [];
+
+    // Helper: Is moderator active at given hour
+    function isModActiveHour(mod, hour) {
+      if (!mod.enabled) return false;
+      const ah = mod.active_hours || [0, 24];
+      if (ah.length < 2) return true;
+      const [start, end] = ah;
+      if (start === 0 && end >= 24) return true;
+      if (start <= end) return hour >= start && hour < end;
+      return hour >= start || hour < end;
+    }
+
+    function formatHours(ah) {
+      if (!ah || (ah[0] === 0 && ah[1] >= 24)) return "24/7 Immer aktiv";
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(ah[0])}:00 – ${pad(ah[1])}:00 Uhr`;
+    }
+
+    // Modal Navigation & Controls
+    const modModal = document.getElementById("moderatorsModal");
+    const modListView = document.getElementById("moderatorsListView");
+    const modFormView = document.getElementById("moderatorFormView");
+
+    document.getElementById("openModeratorsBtn").addEventListener("click", () => {
+      showListView();
+      modModal.classList.remove("hidden");
+    });
+
+    document.getElementById("closeModeratorsBtn").addEventListener("click", () => {
+      modModal.classList.add("hidden");
+    });
+
+    // Close on escape key
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modModal.classList.contains("hidden")) {
+        modModal.classList.add("hidden");
+      }
+    });
+
+    function showListView() {
+      modListView.classList.remove("hidden");
+      modFormView.classList.add("hidden");
+    }
+
+    function showFormView(isNew = false, modData = null) {
+      modListView.classList.add("hidden");
+      modFormView.classList.remove("hidden");
+
+      document.getElementById("modIsNew").value = isNew ? "true" : "false";
+      const idInput = document.getElementById("modId");
+      idInput.readOnly = !isNew;
+      if (!isNew) {
+        idInput.classList.add("bg-slate-950", "text-slate-500", "cursor-not-allowed");
+      } else {
+        idInput.classList.remove("bg-slate-950", "text-slate-500", "cursor-not-allowed");
+      }
+
+      // Populate Voices dropdown
+      const voiceSelect = document.getElementById("modVoice");
+      voiceSelect.innerHTML = cachedVoices.map(v => `
+        <option value="${v.id}">${v.name}</option>
+      `).join("");
+
+      if (isNew) {
+        document.getElementById("formTitle").innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i> Neuen Moderator anlegen`;
+        document.getElementById("modId").value = "";
+        document.getElementById("modName").value = "";
+        document.getElementById("modAvatar").value = "🎙️";
+        document.getElementById("modRole").value = "";
+        document.getElementById("modDescription").value = "";
+        document.getElementById("modHourStart").value = 0;
+        document.getElementById("modHourEnd").value = 24;
+        document.getElementById("shiftPresetSelect").value = "24/7";
+        document.getElementById("modEnabled").checked = true;
+        document.getElementById("modPrompt").value = "Du bist ..., der Moderator bei Studio FM. Dein Ton ist lässig und sympathisch. Du hast einen guten Draht zu deinen Hörern.";
+      } else if (modData) {
+        document.getElementById("formTitle").innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-sky-400"></i> Moderator bearbeiten: ${modData.name}`;
+        document.getElementById("modId").value = modData.id;
+        document.getElementById("modName").value = modData.name;
+        document.getElementById("modAvatar").value = modData.avatar || "🎙️";
+        document.getElementById("modRole").value = modData.role || "";
+        document.getElementById("modVoice").value = modData.voice || "de-DE-KatjaNeural";
+        document.getElementById("modDescription").value = modData.description || "";
+
+        const ah = modData.active_hours || [0, 24];
+        document.getElementById("modHourStart").value = ah[0];
+        document.getElementById("modHourEnd").value = ah[1];
+
+        // Determine preset
+        if (ah[0] === 0 && ah[1] >= 24) document.getElementById("shiftPresetSelect").value = "24/7";
+        else if (ah[0] === 6 && ah[1] === 14) document.getElementById("shiftPresetSelect").value = "frueh";
+        else if (ah[0] === 6 && ah[1] === 16) document.getElementById("shiftPresetSelect").value = "tag";
+        else if (ah[0] === 14 && ah[1] === 22) document.getElementById("shiftPresetSelect").value = "spaet";
+        else if (ah[0] === 22 && ah[1] === 6) document.getElementById("shiftPresetSelect").value = "nacht";
+        else document.getElementById("shiftPresetSelect").value = "custom";
+
+        document.getElementById("modEnabled").checked = modData.enabled !== false;
+        document.getElementById("modPrompt").value = modData.prompt_persona || "";
+      }
+      lucide.createIcons();
+    }
+
+    // Helper: Fill form with a moderator object
+    function applyModeratorToForm(mod) {
+      const isNew = document.getElementById("modIsNew").value === "true";
+      if (isNew) {
+        // Generate an ID that doesn't collide
+        let baseId = mod.id || mod.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        let testId = baseId;
+        let counter = 2;
+        while (cachedModerators[testId]) {
+          testId = `${baseId}_${counter++}`;
+        }
+        document.getElementById("modId").value = testId;
+      }
+      document.getElementById("modName").value = mod.name || "";
+      document.getElementById("modAvatar").value = mod.avatar || "🎙️";
+      document.getElementById("modRole").value = mod.role || "";
+      document.getElementById("modVoice").value = mod.voice || "de-DE-KatjaNeural";
+      document.getElementById("modDescription").value = mod.description || "";
+
+      const ah = mod.active_hours || [6, 16];
+      document.getElementById("modHourStart").value = ah[0];
+      document.getElementById("modHourEnd").value = ah[1];
+
+      if (ah[0] === 0 && ah[1] >= 24) document.getElementById("shiftPresetSelect").value = "24/7";
+      else if (ah[0] === 6 && ah[1] === 14) document.getElementById("shiftPresetSelect").value = "frueh";
+      else if (ah[0] === 6 && ah[1] === 16) document.getElementById("shiftPresetSelect").value = "tag";
+      else if (ah[0] === 14 && ah[1] === 22) document.getElementById("shiftPresetSelect").value = "spaet";
+      else if (ah[0] === 22 && ah[1] === 6) document.getElementById("shiftPresetSelect").value = "nacht";
+      else document.getElementById("shiftPresetSelect").value = "custom";
+
+      document.getElementById("modEnabled").checked = mod.enabled !== false;
+      document.getElementById("modPrompt").value = mod.prompt_persona || "";
+    }
+
+    // Curated Library of Studio Archetypes
+    const RANDOM_STUDIO_ARCHETYPES = [
+      {
+        id: "jupp",
+        name: "Jupp",
+        role: "Hafen-Legende & Seebär",
+        avatar: "⚓",
+        voice: "de-DE-ConradNeural",
+        description: "Schnackt trockenes Plattdeutsch, meckert über Ebbe und Flut und erzählt die wildesten Seemannsgeschichten.",
+        active_hours: [6, 14],
+        prompt_persona: "Du bist Jupp, der alte Schleusenwärter vom Hafen bei Studio FM. Dein Ton: Kernig, maritim ('Moin Moin min Jung', 'Hol di stramm'), trocken und mit tiefem Bass. Du hast Jahrzehnte auf See verbracht und kennst jedes Schiff persönlich. Du schimpfst über Schreibtisch-Seemänner, liebst Shanty-Rock, rauchige Kneipenlieder und frischen Matjes und bringst Seemannsgarn vom Feinsten."
+      },
+      {
+        id: "frauke",
+        name: "Frauke",
+        role: "Kantinenchefin & Schnitzel-Königin",
+        avatar: "🍲",
+        voice: "de-DE-SeraphinaMultilingualNeural",
+        description: "Führt die Sender-Kantine mit eiserner Kelle, weiß genau wer welchen Kaffee trinkt und hasst neumodische Salate.",
+        active_hours: [6, 16],
+        prompt_persona: "Du bist Frauke, die resolute Chefin der Studiokantine bei Studio FM. Dein Ton: Herzlich, direkt, mütterlich-streng und laut. Du sorgst dafür, dass die Studio-Crew ordentlich was zwischen die Kiemen bekommt. Du machst dich über Schicki-Micki-Food lustig, schwörst auf deftige Bratkartoffeln, Schnitzel und Filterkaffee und liebst mitreißende 80er-Hits und Pop-Rock."
+      },
+      {
+        id: "lasse",
+        name: "Lasse",
+        role: "Tontechnik-Azubi (3. Lehrjahr)",
+        avatar: "🧢",
+        voice: "de-DE-FlorianMultilingualNeural",
+        description: "Verlegt ständig Kabel und Adapter, bekommt immer die kniffligsten Nachtschichten ab und ist der Playlist-DJ der Jugend.",
+        active_hours: [6, 14],
+        prompt_persona: "Du bist Lasse, der verplante, aber sympathische Tontechnik-Azubi im 3. Lehrjahr bei Studio FM. Dein Ton: Jung, locker, leicht übermüdet, immer im Stress zwischen Berufsschule und Kalles Technik-Lager. Du suchst ständig nach dem Klinke-Adapter, beschwerst dich über Kabelsalat und bringst moderne Energie, Wortwitze und aktuelle Rock/Pop-Banger ins Radio."
+      },
+      {
+        id: "torben",
+        name: "Torben",
+        role: "Rock-Spezialist & Heavy-Metal-Gitarrist",
+        avatar: "🔥",
+        voice: "de-DE-KillianNeural",
+        description: "Liebt dröhnende Gitarren-Riffs, drückt jedem einen lockeren Spruch und feiert die Spätschicht als beste Sendezeit.",
+        active_hours: [14, 22],
+        prompt_persona: "Du bist Torben, der energiegeladene Rock-Spezialist bei Studio FM. Dein Ton: Reibeisenstimme, trocken und ultralässig. Du hörst am liebsten dröhnenden Hardrock und Heavy Metal. Du machst Witze über feine Büro-Hemden, schwärmst von Live-Konzerten und hältst die Spätschicht für die beste Zeit des Tages, weil da die Chefs schon zu Hause sind."
+      },
+      {
+        id: "birgit",
+        name: "Birgit",
+        role: "Archivarin & Musikredakteurin",
+        avatar: "📋",
+        voice: "de-DE-KatjaNeural",
+        description: "Ohne ihren Durchblick findet niemand eine Platte im Archiv. Trockener Humor und 70er Disco-Fan.",
+        active_hours: [6, 16],
+        prompt_persona: "Du bist Birgit, die Herrscherin über das Musikarchiv und die Playlisten bei Studio FM. Dein Ton: Bürokratisch-sarkastisch, blitzgescheit und trocken. Ohne deine Freigabe läuft hier kein Track. Du liebst gute Ordnung und 70er/80er Klassiker und ziehst die Moderatoren gerne mit Dienstvorschriften auf."
+      },
+      {
+        id: "eike",
+        name: "Eike",
+        role: "Sendemast-Techniker & Höhenphilosoph",
+        avatar: "🏗️",
+        voice: "de-DE-FlorianMultilingualNeural",
+        description: "Sitzt in luftiger Höhe auf dem Sendemast, schaut entspannt auf die Stadt herab und philosophiert über das Leben.",
+        active_hours: [6, 16],
+        prompt_persona: "Du bist Eike, der Sendetechniker auf dem 80-Meter-Sendemast bei Studio FM. Dein Ton: Tiefenentspannt, verträumt und philosophisch. Aus deiner luftigen Höhe blickst du über die Dächer und das Treiben auf den Straßen. Du philosophierst über Möwen, das Wetter und die Hektik der Menschen am Boden und spielst am liebsten epische Rock-Hymnen und Akustik-Tracks."
+      },
+      {
+        id: "helmut",
+        name: "Helmut",
+        role: "Nachtwache & Nachtstudio-Sheriff",
+        avatar: "🔦",
+        voice: "de-DE-ConradNeural",
+        description: "Macht nachts mit Taschenlampe und Dackel seine Runden, grummelt über vergessene Türen und liebt ruhigen Blues.",
+        active_hours: [22, 6],
+        prompt_persona: "Du bist Helmut, die treue Seele vom Sicherheitsdienst und der Nachtwache bei Studio FM. Dein Ton: Ruhig, leicht brummig, gemütlich und wachsam. Nachts, wenn das Gebäude still ist, patrouillierst du durch die Flure. Du liebst die Stille der Nacht, dampfenden schwarzen Tee, ruhige Blues- und Classic-Rock-Nummern und erzählst vom nächtlichen Eigenleben des Funkhauses."
+      },
+      {
+        id: "melanie",
+        name: "Melanie",
+        role: "Sound-Designerin & Gute-Laune-Queen",
+        avatar: "🎨",
+        voice: "de-DE-AmalaNeural",
+        description: "Bringt frische Vibes ins Studio. Lacht gern laut, hasst Nieselregen und sorgt für beste Laune.",
+        active_hours: [6, 14],
+        prompt_persona: "Du bist Melanie, die kreative Sound-Designerin bei Studio FM. Dein Ton: Fröhlich, laut, frech und voller Tatendrang. Du verwandelst trübe Tage in bunte Hörerlebnisse, wetterst gegen schlechtes Wetter und bringst sonnige Laune, coole Anekdoten und melodischen Gute-Laune-Rock ins Radio."
+      },
+      {
+        id: "hauke",
+        name: "Hauke",
+        role: "Oldtimer-Schrauber & Maschinist",
+        avatar: "⚙️",
+        voice: "de-DE-ConradNeural",
+        description: "Hat immer ölige Hände und liebt Southern Rock.",
+        active_hours: [14, 22],
+        prompt_persona: "Du bist Hauke, der kernige Werkstatt-Typ bei Studio FM. Dein Ton: Kernig, tief, pragmatisch und hemdsärmelig. Für dich ist der Sound eines V8-Motors Symphonie pur. Du schimpfst über Elektro-Schnickschnack, schwörst auf 15W-40 Motorenöl und spielst echten, handgemachten Gitarren-Rock."
+      },
+      {
+        id: "sabine",
+        name: "Sabine",
+        role: "Funk- und Toningenieurin",
+        avatar: "📡",
+        voice: "de-DE-KatjaNeural",
+        description: "Versteht Frequenzen und Audio-Pegel im Schlaf. Charmant-nerdig, erklärt kuriose Klang-Phänomene.",
+        active_hours: [6, 16],
+        prompt_persona: "Du bist Sabine, die Elektronik- und Ton-Spezialistin der Funkhaus-Werkstatt bei Studio FM. Dein Ton: Schnell, clever, witzig und ein bisschen herrlich nerdig. Du kennst jede Frequenz, lachst über verhedderte Kupferkabel und liebst Synthie-Pop, 80s Wave und spacigen Rock."
+      }
+    ];
+
+    let randomArchetypeIdx = 0;
+
+    // 1. Instant Dice Randomizer
+    document.getElementById("randomizeModBtn").addEventListener("click", () => {
+      const arch = RANDOM_STUDIO_ARCHETYPES[randomArchetypeIdx % RANDOM_STUDIO_ARCHETYPES.length];
+      randomArchetypeIdx++;
+      applyModeratorToForm(arch);
+      showToast(`🎲 Charakter "${arch.name}" (${arch.role}) ausgewürfelt!`);
+    });
+
+    // 2. AI Generator via Gemini
+    document.getElementById("aiGenerateModBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("aiGenerateModBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-300"></i><span>Erfindet...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch("/api/random-moderator-ai", { method: "POST" });
+        const data = await res.json();
+        if (data.status === "ok" && data.moderator) {
+          applyModeratorToForm(data.moderator);
+          showToast(`✨ KI hat Moderator "${data.moderator.name}" erfunden!`);
+        } else {
+          showToast("Konnte keinen KI-Moderator erfinden: " + (data.detail || "Fehler"), true);
+        }
+      } catch (err) {
+        showToast("Fehler bei KI-Erfinder: " + err.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i><span>KI-Erfinder ✨</span>`;
+        lucide.createIcons();
+      }
+    });
+
+    document.getElementById("addModeratorBtn").addEventListener("click", () => {
+      showFormView(true);
+    });
+    document.getElementById("cancelFormBtn").addEventListener("click", showListView);
+    document.getElementById("formCancelBtn").addEventListener("click", showListView);
+
+    // Preset selection change
+    document.getElementById("shiftPresetSelect").addEventListener("change", (e) => {
+      const val = e.target.value;
+      const s = document.getElementById("modHourStart");
+      const end = document.getElementById("modHourEnd");
+      if (val === "24/7") { s.value = 0; end.value = 24; }
+      else if (val === "frueh") { s.value = 6; end.value = 14; }
+      else if (val === "tag") { s.value = 6; end.value = 16; }
+      else if (val === "spaet") { s.value = 14; end.value = 22; }
+      else if (val === "nacht") { s.value = 22; end.value = 6; }
+    });
+
+    // Save moderator
+    document.getElementById("moderatorForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById("formSaveBtn");
+      saveBtn.disabled = true;
+
+      const mod = {
+        id: document.getElementById("modId").value.trim().toLowerCase(),
+        name: document.getElementById("modName").value.trim(),
+        avatar: document.getElementById("modAvatar").value.trim() || "🎙️",
+        role: document.getElementById("modRole").value.trim(),
+        voice: document.getElementById("modVoice").value,
+        description: document.getElementById("modDescription").value.trim(),
+        active_hours: [
+          parseInt(document.getElementById("modHourStart").value, 10),
+          parseInt(document.getElementById("modHourEnd").value, 10)
+        ],
+        enabled: document.getElementById("modEnabled").checked,
+        prompt_persona: document.getElementById("modPrompt").value.trim()
+      };
+
+      try {
+        const res = await fetch("/api/moderators", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(mod)
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          showToast(`✅ Moderator "${mod.name}" erfolgreich gespeichert!`);
+          showListView();
+          await fetchModerators();
+        } else {
+          showToast("Fehler beim Speichern: " + (data.detail || "Unbekannt"), true);
+        }
+      } catch (err) {
+        showToast("Fehler: " + err.message, true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    // Render Moderators Grid inside Modal
+    function renderModeratorsGrid() {
+      const container = document.getElementById("moderatorsGrid");
+      const currentHour = new Date().getHours();
+
+      const mods = Object.values(cachedModerators);
+      if (mods.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-center text-slate-500 py-8">Keine Moderatoren vorhanden.</div>`;
+        return;
+      }
+
+      container.innerHTML = mods.map(m => {
+        const isCurrent = isModActiveHour(m, currentHour);
+        const voiceObj = cachedVoices.find(v => v.id === m.voice) || { name: m.voice };
+        const isMarkus = m.id === "markus";
+
+        return `
+          <div class="bg-slate-950/70 border ${m.enabled ? 'border-slate-800' : 'border-slate-800/50 opacity-60'} rounded-xl p-4 flex flex-col justify-between hover:border-slate-700 transition">
+            <div>
+              <div class="flex items-start justify-between gap-3 mb-2.5">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-2xl">${m.avatar || '🎙️'}</span>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-bold text-sm text-white">${m.name}</h4>
+                      <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">@${m.id}</span>
+                      ${!m.enabled ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-950/80 text-red-400 border border-red-800">Inaktiv</span>' : ''}
+                    </div>
+                    <p class="text-xs text-sky-400 font-medium">${m.role}</p>
+                  </div>
+                </div>
+
+                <!-- Shift Status Pill -->
+                <div class="text-right">
+                  ${m.enabled && isCurrent ? 
+                    '<span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> JETZT IM DIENST</span>' :
+                    (m.enabled ? '<span class="text-[10px] text-slate-500">Außer Dienst</span>' : '')
+                  }
+                </div>
+              </div>
+
+              <!-- Details -->
+              <div class="space-y-1.5 text-xs text-slate-400 my-3">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+                  <span>Sendezeit: <strong class="text-slate-200 font-mono text-[11px]">${formatHours(m.active_hours)}</strong></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="volume-2" class="w-3.5 h-3.5 text-slate-500"></i>
+                  <span class="truncate">Stimme: <span class="text-slate-300">${voiceObj.name}</span></span>
+                </div>
+                ${m.description ? `
+                  <p class="text-[11px] text-slate-400 italic line-clamp-2 mt-1">"${m.description}"</p>
+                ` : ''}
+              </div>
+
+              <!-- Persona Prompt Preview Box -->
+              <div class="bg-slate-900/90 rounded-lg p-2.5 border border-slate-800/80 text-[11px] text-slate-400 line-clamp-3 font-mono">
+                ${m.prompt_persona}
+              </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80">
+              <!-- Active Toggle -->
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="toggleModEnabled('${m.id}', this.checked)" class="w-3.5 h-3.5 rounded bg-slate-900 text-sky-500">
+                <span class="text-[11px] text-slate-300">Aktiviert</span>
+              </label>
+
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="editModerator('${m.id}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="edit-2" class="w-3 h-3 text-sky-400"></i>
+                  Bearbeiten
+                </button>
+                ${!isMarkus ? `
+                  <button type="button" onclick="deleteModerator('${m.id}')" class="p-1 rounded-lg hover:bg-red-950/60 text-slate-500 hover:text-red-400 transition" title="Löschen">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      lucide.createIcons();
+    }
+
+    // Toggle Moderator enabled status
+    window.toggleModEnabled = async function(modId, enabled) {
+      const mod = cachedModerators[modId];
+      if (!mod) return;
+      mod.enabled = enabled;
+      try {
+        await fetch("/api/moderators", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(mod)
+        });
+        showToast(`Moderator ${mod.name} ${enabled ? 'aktiviert' : 'deaktiviert'}.`);
+        await fetchModerators();
+      } catch (err) {
+        showToast("Fehler beim Umschalten: " + err.message, true);
+      }
+    };
+
+    // Edit Moderator
+    window.editModerator = function(modId) {
+      const mod = cachedModerators[modId];
+      if (mod) showFormView(false, mod);
+    };
+
+    // Delete Moderator
+    window.deleteModerator = async function(modId) {
+      const mod = cachedModerators[modId];
+      if (!mod) return;
+      if (!confirm(`Möchtest du "${mod.name}" wirklich aus dem Moderatoren-Team entfernen?`)) return;
+
+      try {
+        const res = await fetch(`/api/moderators/${modId}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.status === "ok") {
+          showToast(`Moderator "${mod.name}" gelöscht.`);
+          await fetchModerators();
+        } else {
+          showToast("Fehler: " + (data.detail || "Konnte nicht gelöscht werden"), true);
+        }
+      } catch (err) {
+        showToast("Fehler: " + err.message, true);
+      }
+    };
+
+    // Render Prompter Persona Cards
+    function renderPrompterCards() {
+      const container = document.getElementById("personaCards");
+      const mods = Object.values(cachedModerators).filter(m => m.id !== 'markus');
+
+      // Make sure currentSpeaker is valid
+      if (currentSpeaker !== 'duo' && !cachedModerators[currentSpeaker]) {
+        currentSpeaker = mods.length > 0 ? mods[0].id : "duo";
+      }
+
+      let html = mods.map(m => {
+        const isActive = currentSpeaker === m.id;
+        return `
+          <button type="button" data-speaker="${m.id}" class="persona-btn flex flex-col items-center p-2.5 rounded-xl border ${isActive ? 'border-red-500/80 bg-red-950/30 text-white' : 'border-slate-800 bg-slate-950/60 text-slate-300'} text-center transition hover:border-slate-700">
+            <span class="text-xl mb-1">${m.avatar || '🎙️'}</span>
+            <span class="font-bold text-xs">${m.name}</span>
+            <span class="text-[10px] text-slate-400 truncate w-full">${m.role}</span>
+          </button>
+        `;
+      }).join("");
+
+      // Duo Button
+      const isDuoActive = currentSpeaker === "duo";
+      html += `
+        <button type="button" data-speaker="duo" class="persona-btn flex flex-col items-center p-2.5 rounded-xl border ${isDuoActive ? 'border-red-500/80 bg-red-950/30 text-white' : 'border-slate-800 bg-slate-950/60 text-slate-300'} text-center transition hover:border-slate-700">
+          <span class="text-xl mb-1">🎙️</span>
+          <span class="font-bold text-xs">Duo</span>
+          <span class="text-[10px] text-slate-400 truncate w-full">Co-Moderation</span>
+        </button>
+      `;
+
+      container.innerHTML = html;
+
+      // Bind click events
+      container.querySelectorAll(".persona-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          container.querySelectorAll(".persona-btn").forEach(b => {
+            b.classList.remove("border-red-500/80", "bg-red-950/30", "text-white");
+            b.classList.add("border-slate-800", "bg-slate-950/60", "text-slate-300");
+          });
+          btn.classList.add("border-red-500/80", "bg-red-950/30", "text-white");
+          btn.classList.remove("border-slate-800", "bg-slate-950/60", "text-slate-300");
+          currentSpeaker = btn.getAttribute("data-speaker");
+        });
+      });
+    }
+
+    // Update Select Dropdowns in UI
+    function updateSpeakerSelects() {
+      // 1. Shoutout Speaker Select
+      const shoutoutSel = document.getElementById("shoutoutSpeaker");
+      if (shoutoutSel) {
+        const prevVal = shoutoutSel.value;
+        shoutoutSel.innerHTML = Object.values(cachedModerators).map(m => `
+          <option value="${m.id}">${m.avatar || '🎙️'} ${m.name} (${m.role})</option>
+        `).join("");
+        if (prevVal && cachedModerators[prevVal]) shoutoutSel.value = prevVal;
+      }
+
+      // 2. Autopilot Preferred Persona Mode
+      const autoModeSel = document.getElementById("personaModeSelect");
+      if (autoModeSel) {
+        const prevVal = autoModeSel.value;
+        let opts = `<option value="random">Zufällige Rotation (nach Schicht)</option>`;
+        Object.values(cachedModerators).filter(m => m.id !== 'markus').forEach(m => {
+          opts += `<option value="${m.id}">Nur ${m.name}</option>`;
+        });
+        opts += `<option value="duo">Immer Duo (Co-Moderation)</option>`;
+        autoModeSel.innerHTML = opts;
+        if (prevVal) autoModeSel.value = prevVal;
+      }
+    }
+
+    // Fetch Moderators from API
+    async function fetchModerators() {
+      try {
+        const res = await fetch("/api/moderators");
+        const data = await res.json();
+        if (data.status === "ok") {
+          cachedModerators = data.moderators || {};
+          cachedVoices = data.available_voices || [];
+          renderModeratorsGrid();
+          renderPrompterCards();
+          updateSpeakerSelects();
+        }
+      } catch (err) {
+        console.error("Fehler beim Laden der Moderatoren:", err);
+      }
+    }
+
+    // ==========================================
+    // SENDER-EINSTELLUNGEN & THEMES
+    // ==========================================
+    let cachedSettings = {
+      station_name: "Studio FM",
+      station_frequency: "98.5",
+      station_claim: "Dein Sender. Dein Sound.",
+      station_theme: "Modernes Webradio mit abwechslungsreichem Mix, sympathischen Moderatoren, spannenden Stories und bester Unterhaltung rund um die Uhr.",
+      station_genre: "Rock, Pop, Classic Hits & Alternative",
+      weather_city: "Hamburg",
+      weather_lat: 53.55,
+      weather_lon: 9.99
+    };
+
+    const STATION_PRESETS = {
+      studio: {
+        station_name: "Studio FM",
+        station_frequency: "98.5",
+        station_claim: "Dein Sender. Dein Sound.",
+        station_theme: "Modernes Webradio mit abwechslungsreichem Mix, sympathischen Moderatoren, spannenden Stories und bester Unterhaltung rund um die Uhr.",
+        station_genre: "Rock, Pop, Classic Hits & Alternative",
+        weather_city: "Hamburg",
+        weather_lat: 53.55,
+        weather_lon: 9.99
+      },
+      space: {
+        station_name: "Orbital Radio",
+        station_frequency: "104.2",
+        station_claim: "Orbital Deep Space 2142",
+        station_theme: "Sender einer isolierten Forschungsstation und Raumflotte im tiefen Weltall im Jahr 2142. Kosmische Staubstürme, Habitat-Crews, Terraforming und Cyber-Alltag.",
+        station_genre: "Synthwave, Cyber-Rock & Electronic",
+        weather_city: "Orbital Space Station",
+        weather_lat: 53.55,
+        weather_lon: 9.99
+      },
+      rock: {
+        station_name: "Jade Rock FM",
+        station_frequency: "91.1",
+        station_claim: "Der härteste Sound der Küste",
+        station_theme: "Norddeutschlands ehrlichster Rocksender. Lauter Gitarrensound, Schrottplatz-Romantik, Biker-Kultur und raue Küsten-Attitüde.",
+        station_genre: "Hardrock, Heavy Metal & Classic Rock",
+        weather_city: "Hamburg",
+        weather_lat: 53.55,
+        weather_lon: 9.99
+      },
+      pirate: {
+        station_name: "Black Flag FM",
+        station_frequency: "88.8",
+        station_claim: "Freies Piratenradio von See",
+        station_theme: "Rebellisches, unzensiertes Piratenradio sendet von einem verrosteten Kutter aus internationalen Gewässern vor Helgoland. Gegen Zensur und Bürokratie.",
+        station_genre: "Indie Rock, Punk & Shanty-Rock",
+        weather_city: "Helgoland",
+        weather_lat: 54.18,
+        weather_lon: 7.89
+      },
+      beach: {
+        station_name: "Aloha Sunset FM",
+        station_frequency: "101.4",
+        station_claim: "Die beste Strandbar der Welt",
+        station_theme: "Lässige Strandbar direkt in den Dünen. Sonnenuntergang, kalte Drinks, Meeresrauschen, Barfuß-Gefühl und pure Lebensfreude.",
+        station_genre: "Chillout, Reggae-Pop & Beach Vibes",
+        weather_city: "Westerland / Sylt",
+        weather_lat: 54.91,
+        weather_lon: 8.30
+      },
+      cyber: {
+        station_name: "Neon Underground",
+        station_frequency: "99.9",
+        station_claim: "Neo-Berlin Dystopie 2099",
+        station_theme: "Hacker- und Untergrund-Radiostation in einer verregneten, neonbeleuchteten Cyberpunk-Megacity. Kybernetik, Konzerne und Straßenrebellen.",
+        station_genre: "Darksynth, Industrial & Techno",
+        weather_city: "Berlin",
+        weather_lat: 52.52,
+        weather_lon: 13.40
+      }
+    };
+
+    const settingsModal = document.getElementById("settingsModal");
+    document.getElementById("openSettingsBtn").addEventListener("click", () => {
+      populateSettingsForm(cachedSettings);
+      settingsModal.classList.remove("hidden");
+    });
+    document.getElementById("closeSettingsBtn").addEventListener("click", () => {
+      settingsModal.classList.add("hidden");
+    });
+    document.getElementById("cancelSettingsBtn").addEventListener("click", () => {
+      settingsModal.classList.add("hidden");
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !settingsModal.classList.contains("hidden")) {
+        settingsModal.classList.add("hidden");
+      }
+    });
+
+    function populateSettingsForm(st) {
+      if (!st) return;
+      document.getElementById("settingStationName").value = st.station_name || "Studio FM";
+      document.getElementById("settingStationFreq").value = st.station_frequency || "98.5";
+      document.getElementById("settingStationClaim").value = st.station_claim || "";
+      document.getElementById("settingStationGenre").value = st.station_genre || "";
+      document.getElementById("settingStationTheme").value = st.station_theme || "";
+      document.getElementById("settingWeatherCity").value = st.weather_city || "Hamburg";
+      document.getElementById("settingWeatherLat").value = st.weather_lat !== undefined ? st.weather_lat : 53.55;
+      document.getElementById("settingWeatherLon").value = st.weather_lon !== undefined ? st.weather_lon : 9.99;
+    }
+
+    document.getElementById("stationPresetSelect").addEventListener("change", (e) => {
+      const presetKey = e.target.value;
+      if (STATION_PRESETS[presetKey]) {
+        populateSettingsForm(STATION_PRESETS[presetKey]);
+      }
+    });
+
+    document.getElementById("stationSettingsForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveSettingsBtn");
+      saveBtn.disabled = true;
+
+      const newSettings = {
+        station_name: document.getElementById("settingStationName").value.trim(),
+        station_frequency: document.getElementById("settingStationFreq").value.trim(),
+        station_claim: document.getElementById("settingStationClaim").value.trim(),
+        station_genre: document.getElementById("settingStationGenre").value.trim(),
+        station_theme: document.getElementById("settingStationTheme").value.trim(),
+        weather_city: document.getElementById("settingWeatherCity").value.trim() || "Hamburg",
+        weather_lat: parseFloat(document.getElementById("settingWeatherLat").value) || 53.55,
+        weather_lon: parseFloat(document.getElementById("settingWeatherLon").value) || 9.99
+      };
+
+      try {
+        const res = await fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newSettings)
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          cachedSettings = data.settings;
+          applyBrandToUI(cachedSettings);
+          showToast(`✅ Sender-Einstellungen für "${cachedSettings.station_name}" gespeichert!`);
+          settingsModal.classList.add("hidden");
+          updateStatus();
+        } else {
+          showToast("Fehler beim Speichern: " + (data.detail || "Fehler"), true);
+        }
+      } catch (err) {
+        showToast("Fehler: " + err.message, true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    function applyBrandToUI(st) {
+      if (!st) return;
+      document.getElementById("brandName").innerText = st.station_name || "Studio FM";
+      document.getElementById("brandFrequency").innerText = st.station_frequency || "98.5";
+      document.getElementById("brandClaim").innerText = st.station_claim || "";
+      if (st.station_theme) {
+        document.getElementById("brandSubtitle").innerText = st.station_theme.slice(0, 75) + "...";
+      }
+      document.title = `${st.station_name} ${st.station_frequency || ''} — Regiepult`;
+    }
+
+    async function fetchSettings() {
+      try {
+        const res = await fetch("/api/settings");
+        const data = await res.json();
+        if (data.status === "ok" && data.settings) {
+          cachedSettings = data.settings;
+          applyBrandToUI(cachedSettings);
+        }
+      } catch (err) {
+        console.error("Fehler beim Laden der Einstellungen:", err);
+      }
+    }
+
+    // Prompter Character Counter
+    const prompterText = document.getElementById("prompterText");
+    prompterText.addEventListener("input", () => {
+      document.getElementById("charCount").innerText = `${prompterText.value.length} Zeichen`;
+    });
+
+    // 1. Generate Draft
+    document.getElementById("generateDraftBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("generateDraftBtn");
+      const topic = document.getElementById("customTopicInput").value.trim();
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Gemini schreibt Moderation...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch("/api/generate-draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speaker: currentSpeaker, custom_topic: topic || null })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          prompterText.value = data.draft.text;
+          document.getElementById("charCount").innerText = `${data.draft.text.length} Zeichen`;
+          showToast(`Entwurf für ${data.draft.mod_name} generiert!`);
+        } else {
+          showToast("Fehler bei Generierung: " + (data.detail || "Unbekannt"), true);
+        }
+      } catch (e) {
+        showToast("Netzwerkfehler: " + e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i><span>Entwurf mit Gemini generieren</span>`;
+        lucide.createIcons();
+      }
+    });
+
+    // 2. Render Audio Preview
+    document.getElementById("renderPreviewBtn").addEventListener("click", async () => {
+      const text = prompterText.value.trim();
+      if (!text) {
+        showToast("Bitte zuerst Text im Prompter eingeben!", true);
+        return;
+      }
+      const btn = document.getElementById("renderPreviewBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Rendere...`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch("/api/render-preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speaker: currentSpeaker, text: text })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          const audio = document.getElementById("previewAudio");
+          audio.src = data.audio_url;
+          audio.play();
+          showToast("Audio bereit zum Vorhören!");
+        } else {
+          showToast("Fehler beim Rendern: " + (data.detail || "Fehler"), true);
+        }
+      } catch (e) {
+        showToast("Fehler: " + e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i> Audio vorhören`;
+        lucide.createIcons();
+      }
+    });
+
+    // 3. Put On Air
+    document.getElementById("sendOnAirBtn").addEventListener("click", async () => {
+      const text = prompterText.value.trim();
+      if (!text) {
+        showToast("Kein Text vorhanden!", true);
+        return;
+      }
+      const btn = document.getElementById("sendOnAirBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Übertrage an AzuraCast...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch("/api/on-air", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speaker: currentSpeaker, text: text, stichwort: "manuell_regie" })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          showToast("🔥 Moderation erfolgreich ON AIR gestellt & archiviert!");
+          updateStatus();
+        } else {
+          showToast("Upload fehlgeschlagen: " + (data.detail || "Fehler"), true);
+        }
+      } catch (e) {
+        showToast("Fehler: " + e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="radio" class="w-5 h-5 animate-pulse"></i><span>JETZT ON AIR SCHICKEN (Upload zu AzuraCast)</span>`;
+        lucide.createIcons();
+      }
+    });
+
+    // 4. Quick Shoutout
+    document.getElementById("sendShoutoutBtn").addEventListener("click", async () => {
+      const text = document.getElementById("shoutoutText").value.trim();
+      const speaker = document.getElementById("shoutoutSpeaker").value;
+      if (!text) {
+        showToast("Bitte Durchsage-Text eingeben!", true);
+        return;
+      }
+      const btn = document.getElementById("sendShoutoutBtn");
+      btn.disabled = true;
+
+      try {
+        const res = await fetch("/api/quick-shoutout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speaker: speaker, text: text })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          showToast("Blitz-Durchsage sofort on-air!");
+          document.getElementById("shoutoutText").value = "";
+          updateStatus();
+        } else {
+          showToast("Fehler: " + (data.detail || "Fehler"), true);
+        }
+      } catch (e) {
+        showToast("Fehler: " + e.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // 5. Trigger News
+    document.getElementById("triggerNewsBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("triggerNewsBtn");
+      btn.disabled = true;
+      btn.innerText = "Erstelle Nachrichten...";
+
+      try {
+        const res = await fetch("/api/trigger-news", { method: "POST" });
+        const data = await res.json();
+        if (data.status === "ok") {
+          showToast("Nachrichten von Markus aktualisiert!");
+          updateStatus();
+        } else {
+          showToast("Fehler bei Nachrichten: " + (data.detail || "Fehler"), true);
+        }
+      } catch (e) {
+        showToast("Fehler: " + e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="newspaper" class="w-3.5 h-3.5 text-sky-400"></i> Stunden-Nachrichten jetzt anfordern (Markus)`;
+        lucide.createIcons();
+      }
+    });
+
+    // 6. Save Autopilot Settings
+    document.getElementById("saveAutopilotBtn").addEventListener("click", async () => {
+      const enabled = document.getElementById("autopilotToggle").checked;
+      const interval = parseInt(document.getElementById("intervalSelect").value, 10);
+      const duoProb = parseFloat(document.getElementById("duoChanceSlider").value) / 100.0;
+      const personaMode = document.getElementById("personaModeSelect").value;
+      const hourlyNews = document.getElementById("hourlyNewsToggle").checked;
+
+      try {
+        const res = await fetch("/api/autopilot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            enabled: enabled,
+            interval: interval,
+            duo_probability: duoProb,
+            persona_mode: personaMode,
+            hourly_news: hourlyNews
+          })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          showToast("Autopilot-Einstellungen gespeichert!");
+          updateStatus();
+        }
+      } catch (e) {
+        showToast("Fehler beim Speichern: " + e.message, true);
+      }
+    });
+
+    document.getElementById("duoChanceSlider").addEventListener("input", (e) => {
+      document.getElementById("duoChanceLabel").innerText = `${e.target.value}%`;
+    });
+
+    // Periodischer Status-Fetch (alle 3 Sekunden)
+    async function updateStatus() {
+      try {
+        const res = await fetch("/api/status");
+        if (!res.json) return;
+        const data = await res.json();
+
+        // Station Settings & Branding
+        if (data.station_settings) {
+          cachedSettings = data.station_settings;
+          applyBrandToUI(data.station_settings);
+        }
+
+        // Clock & Shift
+        const now = new Date();
+        document.getElementById("studioClock").innerText = now.toLocaleTimeString("de-DE");
+        if (data.schicht) {
+          document.getElementById("studioShift").innerText = `${data.schicht.tag} • ${data.schicht.schicht.split('(')[0]}`;
+        }
+
+        // Weather
+        if (data.weather) {
+          document.getElementById("weatherText").innerText = `${data.weather.summary}`;
+        }
+
+        // Now Playing
+        const np = data.now_playing;
+        if (np) {
+          document.getElementById("nowTitle").innerText = np.title || np.text || "Unbekannter Track";
+          document.getElementById("nowArtist").innerText = np.artist || "Radio Playlist";
+          document.getElementById("nowPlaylistBadge").innerText = np.playlist || "Musik";
+
+          if (np.art) {
+            document.getElementById("nowArt").src = np.art;
+            document.getElementById("nowArt").classList.remove("hidden");
+            document.getElementById("nowArtPlaceholder").classList.add("hidden");
+          } else {
+            document.getElementById("nowArt").classList.add("hidden");
+            document.getElementById("nowArtPlaceholder").classList.remove("hidden");
+          }
+
+          nowPlayingElapsed = np.elapsed || 0;
+          nowPlayingDuration = np.duration || 0;
+          document.getElementById("nowElapsed").innerText = formatTime(nowPlayingElapsed);
+          document.getElementById("nowDuration").innerText = formatTime(nowPlayingDuration);
+          const pct = nowPlayingDuration > 0 ? (nowPlayingElapsed / nowPlayingDuration) * 100 : 0;
+          document.getElementById("nowProgress").style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        }
+
+        // Next Song
+        if (data.playing_next) {
+          document.getElementById("nextTitle").innerText = data.playing_next.text || data.playing_next.title || "Wird ermittelt...";
+        }
+
+        // Autopilot & Track Counter
+        if (data.autopilot) {
+          const count = data.autopilot.tracks_since_last_mod;
+          const interval = data.autopilot.interval;
+          document.getElementById("trackCounterText").innerText = `${count} / ${interval}`;
+
+          // Visual Slots
+          const container = document.getElementById("trackSlots");
+          container.innerHTML = "";
+          for (let i = 1; i <= interval; i++) {
+            const slot = document.createElement("div");
+            slot.className = `h-2 rounded transition-all ${i <= count ? 'bg-gradient-to-r from-sky-400 to-red-500 shadow-sm shadow-red-500/50' : 'bg-slate-800'}`;
+            container.appendChild(slot);
+          }
+
+          document.getElementById("autopilotToggle").checked = data.autopilot.enabled;
+          if (data.autopilot.hourly_news !== undefined) {
+            document.getElementById("hourlyNewsToggle").checked = data.autopilot.hourly_news;
+          }
+
+          // Next Slot Badge
+          const nextSlotBadge = document.getElementById("nextSlotBadge");
+          const nextSlotText = document.getElementById("nextSlotText");
+          if (nextSlotBadge && nextSlotText) {
+            if (data.autopilot.next_slot_is_news) {
+              nextSlotBadge.className = "mt-2.5 px-3 py-1.5 rounded-lg bg-sky-950/70 border border-sky-500/40 flex items-center justify-between text-xs";
+              nextSlotText.className = "font-bold text-sky-400 flex items-center gap-1.5";
+              nextSlotText.innerHTML = `<i data-lucide="newspaper" class="w-3.5 h-3.5"></i> Stunden-Nachrichten (Markus)`;
+            } else {
+              nextSlotBadge.className = "mt-2.5 px-3 py-1.5 rounded-lg bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs";
+              nextSlotText.className = "font-bold text-emerald-400 flex items-center gap-1.5";
+              nextSlotText.innerHTML = `<i data-lucide="mic" class="w-3.5 h-3.5"></i> Musik-Moderation`;
+            }
+            lucide.createIcons();
+          }
+        }
+
+        // History
+        if (data.history && data.history.length > 0) {
+          const histContainer = document.getElementById("songHistoryList");
+          histContainer.innerHTML = data.history.slice(0, 4).map(h => `
+            <div class="flex items-center gap-2 py-1 border-b border-slate-800/60 truncate">
+              <span class="text-slate-600 font-mono text-[10px]">${new Date(h.played_at * 1000).toLocaleTimeString("de-DE", {hour:'2-digit', minute:'2-digit'})}</span>
+              <span class="text-slate-300 truncate">${h.song.text}</span>
+            </div>
+          `).join("");
+        }
+
+        // Recent Moderations
+        if (data.recent_moderations && data.recent_moderations.length > 0) {
+          const modContainer = document.getElementById("recentModerationsList");
+          modContainer.innerHTML = data.recent_moderations.map(m => `
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80">
+              <div class="flex justify-between items-center text-[10px] text-slate-500 mb-1">
+                <span class="font-bold text-sky-400">${m.speaker}</span>
+                <span class="font-mono">${m.time}</span>
+              </div>
+              <p class="text-slate-300 text-[11px] line-clamp-2 italic">"${m.text}"</p>
+            </div>
+          `).join("");
+        }
+
+        // Logs
+        if (data.logs && data.logs.length > 0) {
+          const logContainer = document.getElementById("studioLogList");
+          logContainer.innerHTML = data.logs.slice(0, 15).map(l => {
+            const col = l.level === 'error' ? 'text-red-400' : (l.level === 'success' ? 'text-emerald-400' : 'text-slate-400');
+            return `<div class="${col}"><span class="text-slate-600 font-mono">[${l.time}]</span> ${l.message}</div>`;
+          }).join("");
+        }
+
+      } catch (err) {
+        console.error("Status update error:", err);
+      }
+    }
+
+    // Initialize
+    lucide.createIcons();
+    fetchSettings();
+    fetchModerators();
+    updateStatus();
+    setInterval(updateStatus, 3000);
+
+    // Ticking progress bar between fetches
+    setInterval(() => {
+      if (nowPlayingDuration > 0 && nowPlayingElapsed < nowPlayingDuration) {
+        nowPlayingElapsed += 1;
+        document.getElementById("nowElapsed").innerText = formatTime(nowPlayingElapsed);
+        const pct = (nowPlayingElapsed / nowPlayingDuration) * 100;
+        document.getElementById("nowProgress").style.width = `${Math.min(100, pct)}%`;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

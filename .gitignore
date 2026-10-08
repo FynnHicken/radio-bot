@@ -1,0 +1,24 @@
+# Environment & Secrets
+.env
+*.local
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary Audio & Concat Files
+temp_*
+concat_*
+*.mp3
+!static/
+
+# IDE & Backups
+*.backup*
+.vscode/
+.idea/

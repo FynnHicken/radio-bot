@@ -1,0 +1,13 @@
+services:
+  radio-bot:
+    build: .
+    container_name: ki_moderator
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=Europe/Berlin
